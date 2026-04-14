@@ -3,3 +3,23 @@ _site
 .jekyll-cache
 .jekyll-metadata
 vendor
+
+# Virtual environment
+venv/
+
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Editor junk
+*.swp
+*.swo
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Build output (optional)
+output/
+
