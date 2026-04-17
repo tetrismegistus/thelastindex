@@ -1,6 +1,6 @@
 AUTHOR = "Aric Maddux"
 SITENAME = "The Last Index"
-SITEURL = ""
+SITEURL = "https://thelastindex.com"
 
 PATH = "content"
 
@@ -15,23 +15,22 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
-# Blogroll
-LINKS = (
-    ("Pelican", "https://getpelican.com/"),
-    ("Python.org", "https://www.python.org/"),
-    ("Jinja2", "https://palletsprojects.com/p/jinja/"),
-    ("You can modify those links in your config file", "#"),
-)
 
-# Social widget
-SOCIAL = (
-    ("You can add links in your config file", "#"),
-    ("Another social link", "#"),
-)
+PLUGIN_PATHS = ['plugins/']
+PLUGINS = ['artgal']
+
+ARTGAL_DIR = "artgal"
+ARTGAL_SAVE_AS = "gallery.html"
+ARTGAL_TITLE = "Gallery"
 
 DEFAULT_PAGINATION = False
 
 # Uncomment following line if you want document-relative URLs when developing
 # RELATIVE_URLS = True
 
-THEME = "/home/madducks/dev/repos/pelican-themes/crowsfoot"
+THEME = "theme/crowsfoot"
+
+STATIC_PATHS = ['images', 'extra']
+EXTRA_PATH_METADATA = {
+    'extra/favicon.ico': {'path': 'favicon.ico'},
+}

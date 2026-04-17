@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  .artgal-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .artgal-strip a {
+    display: block;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .artgal-strip img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    max-width: 100% !important;
+    margin: 0 !important;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .artgal-strip img.loaded {
+    opacity: 1;
+  }
+</style>
+
+<section class="content">
+
+  <div class="artgal-strip" id="artgal-top"></div>
+
+  <ol id="postlist">
+    {% for article in articles_page.object_list %}
+        {% if article.metadata.get('card_image') %}
+            <div class="postsummary">
+                <a href="{{ SITEURL }}/{{ article.url }}">
+                    <img src="{{ article.metadata['card_image'] }}"
+                         alt="{{ article.title }}"
+                        class="card-image">
+                </a>
+            </div>
+        {% else %}
+            <div class="postsummary">{{ article.summary }}</div>
+        {% endif %}
+    {% endfor %}
+  </ol><!-- /#post-list -->
+
+  {% include 'pagination.html' %}
+
+  <div class="artgal-strip" id="artgal-bottom"></div>
+
+</section><!-- /#content -->
+
+{% if artgal_all %}
+<script>
+  var images = {{ artgal_all }};
+  var galleryUrl = "{{ artgal_url }}";
+
+  function sample(arr, n) {
+    var copy = arr.slice();
+    for (var i = copy.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = copy[i]; copy[i] = copy[j]; copy[j] = tmp;
+    }
+    return copy.slice(0, n);
+  }
+
+  function makeStrip(containerId, urls) {
+    var strip = document.getElementById(containerId);
+    urls.forEach(function(url) {
+        var a = document.createElement('a');
+        var filename = url.split('/').pop();
+        a.href = galleryUrl + '#' + filename;
+        var img = document.createElement('img');
+        img.src = url;
+        img.alt = 'Gallery';
+        img.loading = 'lazy';
+        img.addEventListener('load', function() { img.classList.add('loaded'); });
+        a.appendChild(img);
+        strip.appendChild(a);
+    });
+}
+
+  var picked = sample(images, 6);
+  makeStrip('artgal-top', picked.slice(0, 3));
+  makeStrip('artgal-bottom', picked.slice(3));
+</script>
+{% endif %}
+
+{% endblock content %}

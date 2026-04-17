@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="content">
+
+  {% if article.metadata.get('hero_image') %}
+  <div class="page__hero--overlay"
+       style="background-color: #000; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ article.metadata['hero_image'] }}');">
+      <div class="wrapper">
+          <h1 class="page__title">{{ article.title }}</h1>
+          <p class="page__lead">{{ article.hero_text }}</p>
+      </div>
+      {% if article.metadata.get('hero_caption') %}
+      <span class="page__hero-caption">{{ article.metadata['hero_caption'] }}</span>
+      {% endif %}
+  </div>
+  {% else %}
+  <h3 class="posttitle">
+    <a class="nodec" href="/{{ article.url }}" rel="bookmark" title="Permalink to {{ article.title|striptags }}">
+      {{ article.title }}
+    </a>
+  </h3>
+  {% endif %}
+
+  <div class="postinfo">
+    <p class="published" title="{{ article.date.isoformat() }}">
+      {{ article.locale_date }}
+    </p>
+
+    {% if not article.metadata.get('hero_image') %}
+    <div class="postsummary">{{ article.summary }}</div>
+    {% endif %}
+
+    {% if article.author and SHOW_ARTICLE_AUTHOR %}
+    <address class="vcard author">
+      By <a class="nodec" href="{{ SITEURL }}/{{ article.author.url }}">{{ article.author }}</a>
+    </address>
+    {% endif %}
+  </div><!-- .postinfo -->
+
+  <div class="article">
+    {{ article.content }}
+  </div><!-- .content -->
+
+</section>
+
+{% endblock %}
