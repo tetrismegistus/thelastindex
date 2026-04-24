@@ -6,7 +6,7 @@
 body {
     max-width: 80%;
     background-color:#fafafa;
-    font-family:'Open Sans';
+    font-family:'Merriweather';
     margin: 20px auto 100px auto;
 }
 
@@ -318,4 +318,43 @@ footer {
 dialog.artgal-lightbox img:not([src]),
 dialog.artgal-lightbox img[src=""] {
     display: none;
+}
+
+.page__title {
+    font-family: 'Merriweather';
+    font-weight: 700;
+    font-size: 2em;
+    color: #fff;
+    margin-bottom: 0.4em;
+    line-height: 1.1;
+}
+
+.page__lead {
+    font-size: 1.1em;
+    color: #eee;
+    margin-top: 0.6em;
+}
+
+
+pre, code, kbd, samp,
+.article code,
+.codehilite,
+.codehilite *,
+.highlight,
+.highlight * {
+    font-family: 'Source Code Pro', monospace !important;
+}
+
+.article pre {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1em;
+    margin: auto;
+    padding: 1em;
+    line-height: 120%;
+}
+
+
+.highlight span,
+.codehilite span {
+    font-family: 'Source Code Pro', monospace !important;
 }

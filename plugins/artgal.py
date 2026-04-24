@@ -134,7 +134,6 @@ GALLERY_TEMPLATE = """<!DOCTYPE html>
   </header>
 
   <section class="content">
-    <h2 style="max-width:800px;margin:1em auto 0.5em auto;font-family:Merriweather;font-weight:300;">{title}</h2>
     <div class="artgal-grid">
 {image_items}
     </div>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>budget.thelastindex.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:        #0e0f11;
+    --bg2:       #161719;
+    --bg3:       #1e2022;
+    --border:    #2a2d31;
+    --text:      #d4d8dc;
+    --muted:     #6b717a;
+    --accent:    #4e9af1;
+    --green:     #52d08a;
+    --red:       #e05c5c;
+    --yellow:    #e0b84e;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header .wordmark {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--accent);
+  }
+
+  header .wordmark span { color: var(--muted); font-weight: 400; }
+
+  nav {
+    display: flex;
+    gap: 2px;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    letter-spacing: .05em;
+    transition: color .15s, background .15s;
+  }
+
+  nav button:hover { color: var(--text); background: var(--bg3); }
+  nav button.active { color: var(--accent); background: var(--bg3); }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Summary cards ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+  }
+
+  .card .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .card .value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .card .value.pos { color: var(--green); }
+  .card .value.neg { color: var(--red); }
+  .card .value.neu { color: var(--text); }
+
+  /* ── Chart ── */
+  .chart-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 28px;
+    height: 280px;
+    position: relative;
+  }
+
+  /* ── Event table ── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .section-head h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: .08em;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #1c1e21;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .pill.income   { background: #1a3d2a; color: var(--green); }
+  .pill.expense  { background: #3a1e1e; color: var(--red); }
+  .pill.one-off  { background: #3a2f12; color: var(--yellow); }
+
+  .amt-pos { color: var(--green); }
+  .amt-neg { color: var(--red); }
+
+  /* ── Forms / CRUD ── */
+  .crud-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .crud-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .crud-header h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .crud-header .toggle { color: var(--muted); font-size: 18px; line-height: 1; }
+
+  .crud-body { padding: 16px; }
+  .crud-body.collapsed { display: none; }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin-bottom: 14px;
+  }
+
+  /* ── Form row ── */
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-end;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input, select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color .15s;
+    min-width: 90px;
+  }
+
+  input:focus, select:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  /* ── Buttons ── */
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .06em;
+    padding: 7px 16px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { opacity: .8; }
+  .btn-primary { background: var(--accent); color: #000; font-weight: 600; }
+  .btn-danger  { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 4px 10px; font-size: 11px; }
+  .btn-sm      { padding: 4px 10px; font-size: 11px; }
+  .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+  /* ── Settings panel ── */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 16px;
+    align-items: center;
+    max-width: 320px;
+  }
+
+  .settings-grid label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── Misc ── */
+  .empty { color: var(--muted); font-family: var(--mono); font-size: 12px; padding: 16px 0; }
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 4px; padding: 10px 18px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--green); opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">budget<span>.thelastindex</span></div>
+  <nav>
+    <button class="active" data-tab="projection">projection</button>
+    <button data-tab="income">income</button>
+    <button data-tab="expenses">expenses</button>
+    <button data-tab="oneoff">one-offs</button>
+    <button data-tab="settings">settings</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ── PROJECTION ── -->
+  <div id="tab-projection" class="tab-panel active">
+    <div class="cards" id="summary-cards">
+      <div class="card"><div class="label">current balance</div><div class="value neu" id="c-balance">—</div></div>
+      <div class="card"><div class="label">projected income</div><div class="value pos" id="c-income">—</div></div>
+      <div class="card"><div class="label">projected expenses</div><div class="value neg" id="c-expenses">—</div></div>
+      <div class="card"><div class="label">closing balance</div><div class="value neu" id="c-closing">—</div></div>
+      <div class="card"><div class="label">minimum balance</div><div class="value neu" id="c-min">—</div></div>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="balance-chart"></canvas>
+    </div>
+
+    <div class="section-head">
+      <h2>projected events</h2>
+      <button class="btn btn-ghost btn-sm" onclick="loadProjection()">↺ refresh</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>date</th><th>day</th><th>name</th><th>type</th>
+            <th style="text-align:right">amount</th>
+            <th style="text-align:right">balance</th>
+          </tr>
+        </thead>
+        <tbody id="events-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── INCOME ── -->
+  <div id="tab-income" class="tab-panel">
+    <div class="crud-section">
+      <div class="crud-header" onclick="toggleSection(this)">
+        <h3>income streams</h3><span class="toggle">−</span>
+      </div>
+      <div class="crud-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>name</th><th>net/occurrence</th><th>freq</th><th>anchor</th><th>weekday</th><th>end</th><th></th></tr></thead>
+            <tbody id="income-body"></tbody>
+          </table>
+        </div>
+        <div class="form-row" id="income-form">
+          <div class="form-group"><label>name</label><input id="i-name" placeholder="Paycheck"></div>
+          <div class="form-group"><label>net $</label><input id="i-net" type="number" placeholder="1200" style="width:90px"></div>
+          <div class="form-group"><label>freq</label>
+            <select id="i-freq">
+              <option value="weekly">weekly</option>
+              <option value="biweekly" selected>biweekly</option>
+              <option value="monthly">monthly</option>
+              <option value="quarterly">quarterly</option>
+              <option value="annual">annual</option>
+            </select>
+          </div>
+          <div class="form-group"><label>anchor</label><input id="i-anchor" type="date"></div>
+          <div class="form-group"><label>weekday</label><input id="i-weekday" placeholder="fri" style="width:70px"></div>
+          <div class="form-group"><label>end</label><input id="i-end" type="date"></div>
+          <button class="btn btn-primary" onclick="addIncome()">+ add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EXPENSES ── -->
+  <div id="tab-expenses" class="tab-panel">
+    <div class="crud-section">
+      <div class="crud-header" onclick="toggleSection(this)">
+        <h3>recurring expenses</h3><span class="toggle">−</span>
+      </div>
+      <div class="crud-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>name</th><th>amount</th><th>freq</th><th>anchor</th><th>weekday</th><th>end</th><th>category</th><th></th></tr></thead>
+            <tbody id="recurring-body"></tbody>
+          </table>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>name</label><input id="r-name" placeholder="Rent"></div>
+          <div class="form-group"><label>amount $</label><input id="r-amount" type="number" placeholder="850" style="width:90px"></div>
+          <div class="form-group"><label>freq</label>
+            <select id="r-freq">
+              <option value="weekly">weekly</option>
+              <option value="biweekly">biweekly</option>
+              <option value="monthly" selected>monthly</option>
+              <option value="quarterly">quarterly</option>
+              <option value="annual">annual</option>
+            </select>
+          </div>
+          <div class="form-group"><label>anchor</label><input id="r-anchor" type="date"></div>
+          <div class="form-group"><label>weekday</label><input id="r-weekday" placeholder="fri" style="width:70px"></div>
+          <div class="form-group"><label>end</label><input id="r-end" type="date"></div>
+          <div class="form-group"><label>category</label><input id="r-category" placeholder="expense" style="width:90px"></div>
+          <button class="btn btn-primary" onclick="addRecurring()">+ add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ONE-OFFS ── -->
+  <div id="tab-oneoff" class="tab-panel">
+    <div class="crud-section">
+      <div class="crud-header" onclick="toggleSection(this)">
+        <h3>one-off expenses</h3><span class="toggle">−</span>
+      </div>
+      <div class="crud-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>name</th><th>amount</th><th>date</th><th>category</th><th></th></tr></thead>
+            <tbody id="oneoff-body"></tbody>
+          </table>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>name</label><input id="o-name" placeholder="Car repair"></div>
+          <div class="form-group"><label>amount $</label><input id="o-amount" type="number" placeholder="200" style="width:90px"></div>
+          <div class="form-group"><label>date</label><input id="o-date" type="date"></div>
+          <div class="form-group"><label>category</label><input id="o-category" placeholder="one-off" style="width:90px"></div>
+          <button class="btn btn-primary" onclick="addOneOff()">+ add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS ── -->
+  <div id="tab-settings" class="tab-panel">
+    <div class="crud-section">
+      <div class="crud-header" onclick="toggleSection(this)">
+        <h3>settings</h3><span class="toggle">−</span>
+      </div>
+      <div class="crud-body">
+        <div class="settings-grid">
+          <label>current balance $</label>
+          <input id="s-balance" type="number" step="0.01" placeholder="0.00">
+          <label>projection window (weeks)</label>
+          <input id="s-weeks" type="number" min="1" max="52" placeholder="16">
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="saveSettings()">save settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let chart = null;
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'projection') loadProjection();
+    if (btn.dataset.tab === 'income')     loadIncome();
+    if (btn.dataset.tab === 'expenses')   loadRecurring();
+    if (btn.dataset.tab === 'oneoff')     loadOneOff();
+    if (btn.dataset.tab === 'settings')   loadSettings();
+  });
+});
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  const tog  = header.querySelector('.toggle');
+  if (body.classList.toggle('collapsed')) tog.textContent = '+';
+  else tog.textContent = '−';
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmt = n => n >= 0 ? '$' + n.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})
+                        : '−$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+
+async function api(path, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+function dayName(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+}
+
+// ── Projection ─────────────────────────────────────────────────────────────
+async function loadProjection() {
+  const data = await api('/api/projection');
+  const s = data.summary;
+
+  $('c-balance').textContent  = fmt(s.balance);
+  $('c-income').textContent   = fmt(s.total_income);
+  $('c-expenses').textContent = fmt(s.total_expenses);
+
+  const closing = $('c-closing');
+  closing.textContent = fmt(s.final_balance);
+  closing.className = 'value ' + (s.final_balance >= 0 ? 'pos' : 'neg');
+
+  const minEl = $('c-min');
+  minEl.textContent = fmt(s.min_balance);
+  minEl.className = 'value ' + (s.min_balance >= 0 ? 'pos' : 'neg');
+
+  // chart
+  const today = new Date().toISOString().split('T')[0];
+  const labels = [today, ...data.events.map(e => e.date)];
+  const balances = [s.balance, ...data.events.map(e => e.running_balance)];
+
+  const colors = balances.map(b => b >= 0 ? 'rgba(82,208,138,0.7)' : 'rgba(224,92,92,0.7)');
+
+  if (chart) chart.destroy();
+  const ctx = $('balance-chart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: balances,
+        borderColor: '#4e9af1',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: {
+          target: { value: 0 },
+          above: 'rgba(82,208,138,0.07)',
+          below: 'rgba(224,92,92,0.07)',
+        },
+        stepped: 'before',
+        tension: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#1e2022',
+        borderColor: '#2a2d31',
+        borderWidth: 1,
+        titleColor: '#6b717a',
+        bodyColor: '#d4d8dc',
+        titleFont: { family: 'IBM Plex Mono', size: 11 },
+        bodyFont: { family: 'IBM Plex Mono', size: 12 },
+        callbacks: { label: ctx => ' ' + fmt(ctx.parsed.y) }
+      }},
+      scales: {
+        x: {
+          ticks: { color: '#6b717a', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 10 },
+          grid: { color: '#1c1e21' }
+        },
+        y: {
+          ticks: {
+            color: '#6b717a',
+            font: { family: 'IBM Plex Mono', size: 10 },
+            callback: v => '$' + v.toLocaleString()
+          },
+          grid: { color: '#1c1e21' }
+        }
+      }
+    }
+  });
+
+  // events table
+  const tbody = $('events-body');
+  tbody.innerHTML = data.events.map(e => `
+    <tr>
+      <td>${e.date}</td>
+      <td>${dayName(e.date)}</td>
+      <td>${e.name}</td>
+      <td><span class="pill ${e.category}">${e.category}</span></td>
+      <td style="text-align:right" class="${e.amount>=0?'amt-pos':'amt-neg'}">${fmt(e.amount)}</td>
+      <td style="text-align:right" class="${e.running_balance>=0?'amt-pos':'amt-neg'}">${fmt(e.running_balance)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Income ─────────────────────────────────────────────────────────────────
+async function loadIncome() {
+  const rows = await api('/api/income');
+  $('income-body').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td class="amt-pos">${fmt(r.net)}</td>
+      <td>${r.freq}</td>
+      <td>${r.anchor}</td>
+      <td>${r.weekday ?? ''}</td>
+      <td>${r.end_date ?? ''}</td>
+      <td><button class="btn btn-danger" onclick="deleteIncome(${r.id})">del</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="7" class="empty">no income streams</td></tr>';
+}
+
+async function addIncome() {
+  const weekday = $('i-weekday').value.trim();
+  const wdMap = {mon:0,tue:1,wed:2,thu:3,fri:4,sat:5,sun:6};
+  let wdNum = null;
+  if (weekday) wdNum = isNaN(+weekday) ? (wdMap[weekday.slice(0,3).toLowerCase()] ?? null) : +weekday;
+
+  await api('/api/income', 'POST', {
+    name: $('i-name').value,
+    net: +$('i-net').value,
+    freq: $('i-freq').value,
+    anchor: $('i-anchor').value,
+    end_date: $('i-end').value || null,
+    weekday: wdNum,
+  });
+  toast('income stream added');
+  loadIncome();
+  ['i-name','i-net','i-anchor','i-weekday','i-end'].forEach(id => $(id).value = '');
+}
+
+async function deleteIncome(id) {
+  if (!confirm('delete this income stream?')) return;
+  await api('/api/income/' + id, 'DELETE');
+  toast('deleted');
+  loadIncome();
+}
+
+// ── Recurring ──────────────────────────────────────────────────────────────
+async function loadRecurring() {
+  const rows = await api('/api/recurring');
+  $('recurring-body').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td class="amt-neg">${fmt(r.amount)}</td>
+      <td>${r.freq}</td>
+      <td>${r.anchor}</td>
+      <td>${r.weekday ?? ''}</td>
+      <td>${r.end_date ?? ''}</td>
+      <td>${r.category}</td>
+      <td><button class="btn btn-danger" onclick="deleteRecurring(${r.id})">del</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="8" class="empty">no recurring expenses</td></tr>';
+}
+
+async function addRecurring() {
+  const weekday = $('r-weekday').value.trim();
+  const wdMap = {mon:0,tue:1,wed:2,thu:3,fri:4,sat:5,sun:6};
+  let wdNum = null;
+  if (weekday) wdNum = isNaN(+weekday) ? (wdMap[weekday.slice(0,3).toLowerCase()] ?? null) : +weekday;
+
+  await api('/api/recurring', 'POST', {
+    name: $('r-name').value,
+    amount: +$('r-amount').value,
+    freq: $('r-freq').value,
+    anchor: $('r-anchor').value,
+    end_date: $('r-end').value || null,
+    weekday: wdNum,
+    category: $('r-category').value || 'expense',
+  });
+  toast('expense added');
+  loadRecurring();
+  ['r-name','r-amount','r-anchor','r-weekday','r-end','r-category'].forEach(id => $(id).value = '');
+}
+
+async function deleteRecurring(id) {
+  if (!confirm('delete this expense?')) return;
+  await api('/api/recurring/' + id, 'DELETE');
+  toast('deleted');
+  loadRecurring();
+}
+
+// ── One-offs ───────────────────────────────────────────────────────────────
+async function loadOneOff() {
+  const rows = await api('/api/oneoff');
+  $('oneoff-body').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td class="amt-neg">${fmt(r.amount)}</td>
+      <td>${r.on_date}</td>
+      <td>${r.category}</td>
+      <td><button class="btn btn-danger" onclick="deleteOneOff(${r.id})">del</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" class="empty">no one-off expenses</td></tr>';
+}
+
+async function addOneOff() {
+  await api('/api/oneoff', 'POST', {
+    name: $('o-name').value,
+    amount: +$('o-amount').value,
+    on_date: $('o-date').value,
+    category: $('o-category').value || 'one-off',
+  });
+  toast('one-off added');
+  loadOneOff();
+  ['o-name','o-amount','o-date','o-category'].forEach(id => $(id).value = '');
+}
+
+async function deleteOneOff(id) {
+  if (!confirm('delete this one-off?')) return;
+  await api('/api/oneoff/' + id, 'DELETE');
+  toast('deleted');
+  loadOneOff();
+}
+
+// ── Settings ───────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const s = await api('/api/settings');
+  $('s-balance').value = s.balance ?? 0;
+  $('s-weeks').value   = s.weeks ?? 16;
+}
+
+async function saveSettings() {
+  await api('/api/settings', 'POST', {
+    balance: +$('s-balance').value,
+    weeks: +$('s-weeks').value,
+  });
+  toast('settings saved');
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+loadProjection();
+</script>
+</body>
+</html>
