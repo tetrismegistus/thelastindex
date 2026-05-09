@@ -38,7 +38,7 @@
     {% for article in articles_page.object_list %}
         {% if article.metadata.get('card_image') %}
             <div class="postsummary">
-                <a href="{{ SITEURL }}/{{ article.url }}">
+                <a href="{{ article.metadata.get('sketch_url', SITEURL + '/' + article.url) }}">
                     <img src="{{ article.metadata['card_image'] }}"
                          alt="{{ article.title }}"
                         class="card-image">

@@ -44,6 +44,16 @@ def clean(c):
 def build(c):
     """Build local version of site"""
     pelican_run("-s {settings_base}".format(**CONFIG))
+    _copy_sketches()
+
+
+def _copy_sketches():
+    src = os.path.join("content", "extra", "sketches")
+    dst = os.path.join(CONFIG["deploy_path"], "sketches")
+    if os.path.isdir(src):
+        if os.path.exists(dst):
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)
 
 
 @task
@@ -93,6 +103,7 @@ def preview(c):
     """Build production version of site"""
     pelican_run("-s {settings_publish}".format(**CONFIG))
 
+
 @task
 def livereload(c):
     """Automatically reload browser tab upon file modification."""
@@ -136,6 +147,7 @@ def livereload(c):
 def publish(c):
     """Publish to production via rsync"""
     pelican_run("-s {settings_publish}".format(**CONFIG))
+    _copy_sketches()
     c.run(
         'rsync --delete --exclude ".DS_Store" -pthrvz -c '
         '-e "ssh -p {ssh_port}" '
